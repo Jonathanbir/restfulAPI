@@ -62,7 +62,7 @@ app.post("/students", async (req, res) => {
 });
 
 //put
-app.put("students/:_id", async (req, res) => {
+app.put("/students/:_id", async (req, res) => {
   try {
     let { _id } = req.params;
     let { name, age, major, merit, other } = req.body;
@@ -73,13 +73,49 @@ app.put("students/:_id", async (req, res) => {
         new: true,
         runValidators: true,
         overwrite: true,
-        //因為 HTTP put request 要求客戶端提供所有數據,所以
-        //我們需要根據客戶端提供的數據,來更新資料庫內的資料
+        // 因為HTTP put request要求客戶端提供所有數據，所以
+        // 我們需要根據客戶端提供的數據，來更新資料庫內的資料
       }
     );
+
     res.send({ msg: "成功更新學生資料!", updatedData: newData });
   } catch (e) {
-    return res.status(400).send(e);
+    return res.status(400).send(e.message);
+  }
+});
+
+//patch
+
+class NewData {
+  constructor() {}
+  setProperty(key, value) {
+    if (key !== "merit" && key !== "other") {
+      this[key] = value;
+    } else {
+      this[`scholarship.${key}`] = value;
+    }
+  }
+}
+
+app.patch("/students/:_id", async (req, res) => {
+  try {
+    let { _id } = req.params;
+    let newObject = new NewData();
+
+    for (let property in req.body) {
+      newObject.setProperty(property, req.body[property]);
+    }
+    console.log(req.body);
+    console.log(newObject);
+
+    let newData = await Student.findByIdAndUpdate({ _id }, newObject, {
+      new: true,
+      runValidators: true,
+      // 不能寫overwrite: true
+    });
+    res.send({ msg: "成功更新學生資料!", updatedData: newData });
+  } catch (e) {
+    return res.status(400).send(e.message);
   }
 });
 
