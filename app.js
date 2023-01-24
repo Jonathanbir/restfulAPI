@@ -44,7 +44,7 @@ app.get("/students/:_id", async (req, res) => {
 app.post("/students", async (req, res) => {
   try {
     let { name, age, major, merit, other } = req.body;
-    console.log(name, age, major, merit, other);
+    // console.log(name, age, major, merit, other);
     let newStudent = new Student({
       name,
       age,
@@ -58,6 +58,28 @@ app.post("/students", async (req, res) => {
     });
   } catch (e) {
     return res.status(400).send(e.message);
+  }
+});
+
+//put
+app.put("students/:_id", async (req, res) => {
+  try {
+    let { _id } = req.params;
+    let { name, age, major, merit, other } = req.body;
+    let newData = await Student.findOneAndUpdate(
+      { _id },
+      { name, age, major, scholarship: { merit, other } },
+      {
+        new: true,
+        runValidators: true,
+        overwrite: true,
+        //因為 HTTP put request 要求客戶端提供所有數據,所以
+        //我們需要根據客戶端提供的數據,來更新資料庫內的資料
+      }
+    );
+    res.send({ msg: "成功更新學生資料!", updatedData: newData });
+  } catch (e) {
+    return res.status(400).send(e);
   }
 });
 
