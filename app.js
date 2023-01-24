@@ -119,6 +119,18 @@ app.patch("/students/:_id", async (req, res) => {
   }
 });
 
+//delete
+app.delete("/students/:_id", async (req, res) => {
+  try {
+    let { _id } = req.params;
+    let deleteResult = await Student.deleteOne({ _id });
+    return res.send(deleteResult);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("無法刪除學生資料");
+  }
+});
+
 app.listen(port, () => {
   console.log("伺服器正在聆聽" + port + "...");
 });
