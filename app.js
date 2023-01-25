@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const Student = require("./models/student");
+const methodOverride = require("method-override");
 
 let port = 3021;
 
@@ -17,6 +18,7 @@ mongoose
 app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extende: true }));
+app.use(methodOverride("_method"));
 // app.use(cors());
 
 //get
@@ -69,14 +71,29 @@ app.post("/students", async (req, res) => {
   }
 });
 
+//edit
+app.get("/students/:_id/edit", async (req, res) => {
+  let { _id } = req.params;
+  try {
+    let foundStudent = await Student.findOne({ _id }).exec();
+    if (foundStudent != null) {
+      return res.render("edit-student", { foundStudent });
+    } else {
+      return res.status(400).render("student-not-found");
+    }
+  } catch (e) {
+    return res.status(400).render("student-not-found");
+  }
+});
+
 //put
 app.put("/students/:_id", async (req, res) => {
   try {
     let { _id } = req.params;
-    let { name, age, merit, other } = req.body;
+    let { name, age, major, merit, other } = req.body;
     let newData = await Student.findOneAndUpdate(
       { _id },
-      { name, age, scholarship: { merit, other } },
+      { name, age, major, scholarship: { merit, other } },
       {
         new: true,
         runValidators: true,
@@ -85,8 +102,7 @@ app.put("/students/:_id", async (req, res) => {
         // 我們需要根據客戶端提供的數據，來更新資料庫內的資料
       }
     );
-
-    res.send({ msg: "成功更新學生資料!", updatedData: newData });
+    return res.render("student-update-success", { newData });
   } catch (e) {
     return res.status(400).send(e.message);
   }
