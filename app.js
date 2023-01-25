@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Student = require("./models/student");
 const methodOverride = require("method-override");
 
-let port = 3021;
+let port = 3023;
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/exampleDB")
@@ -21,16 +21,29 @@ app.use(express.urlencoded({ extende: true }));
 app.use(methodOverride("_method"));
 // app.use(cors());
 
+// function myMiddleware(req, res, next) {
+//   console.log("正在執行myMiddleware...");
+//   next();
+// }
+
 //get
-app.get("/students", async (req, res) => {
-  try {
-    let studentData = await Student.find({}).exec();
-    // return res.send(studentData);
-    return res.render("students", { studentData });
-  } catch (e) {
-    return res.status(500).send("尋找資料時發生錯誤。。。");
+app.get(
+  "/students",
+  //   () => (req, res, next) => {
+  //     console.log("正在執行myMiddleware...");
+  //     next();
+  //   },
+  async (req, res, next) => {
+    try {
+      let studentData = await Student.find({}).exec();
+      // return res.send(studentData);
+      return res.render("students", { studentData });
+    } catch (e) {
+      //   return res.status(500).send("尋找資料時發生錯誤。。。");
+      next(e);
+    }
   }
-});
+);
 
 //new
 app.get("/students/new", (req, res) => {
@@ -38,7 +51,7 @@ app.get("/students/new", (req, res) => {
 });
 
 //get
-app.get("/students/:_id", async (req, res) => {
+app.get("/students/:_id", async (req, res, next) => {
   let { _id } = req.params;
   try {
     let foundStudent = await Student.findOne({ _id }).exec();
@@ -48,7 +61,8 @@ app.get("/students/:_id", async (req, res) => {
       return res.status(400).render("student-not-found");
     }
   } catch (e) {
-    return res.status(400).render("student-not-found");
+    // return res.status(400).render("student-not-found");
+    next(e);
   }
 });
 
@@ -72,7 +86,7 @@ app.post("/students", async (req, res) => {
 });
 
 //edit
-app.get("/students/:_id/edit", async (req, res) => {
+app.get("/students/:_id/edit", async (req, res, next) => {
   let { _id } = req.params;
   try {
     let foundStudent = await Student.findOne({ _id }).exec();
@@ -82,7 +96,8 @@ app.get("/students/:_id/edit", async (req, res) => {
       return res.status(400).render("student-not-found");
     }
   } catch (e) {
-    return res.status(400).render("student-not-found");
+    // return res.status(400).render("student-not-found");
+    next(e);
   }
 });
 
@@ -153,6 +168,11 @@ app.delete("/students/:_id", async (req, res) => {
     console.log(e);
     return res.status(500).send("無法刪除學生資料");
   }
+});
+
+app.use((err, req, res, next) => {
+  console.log("正在使用這個middleware...");
+  return res.status(400).render("error");
 });
 
 app.listen(port, () => {
