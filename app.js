@@ -3,7 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 const Student = require("./models/student");
 
-let port = 3010;
+let port = 3021;
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/exampleDB")
@@ -17,27 +17,36 @@ mongoose
 app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extende: true }));
-app.use(cors());
+// app.use(cors());
 
 //get
 app.get("/students", async (req, res) => {
   try {
     let studentData = await Student.find({}).exec();
-    return res.send(studentData);
+    // return res.send(studentData);
+    return res.render("students", { studentData });
   } catch (e) {
-    return res.status(500).send("尋找資料時發生錯誤...");
+    return res.status(500).send("尋找資料時發生錯誤。。。");
   }
 });
 
+//new
+app.get("/students/new", (res, req) => {
+  return res.render("new-student-form");
+});
+
+//get
 app.get("/students/:_id", async (req, res) => {
   let { _id } = req.params;
   try {
-    let foundStudent = await Student.find({
-      _id,
-    }).exec();
-    return res.send(foundStudent);
+    let foundStudent = await Student.findOne({ _id }).exec();
+    if (foundStudent != null) {
+      return res.render("student-page", { foundStudent });
+    } else {
+      return res.status(400).render("student-not-found");
+    }
   } catch (e) {
-    return res.status(500).send("尋找資料時發生錯誤...");
+    return res.status(400).render("student-not-found");
   }
 });
 
