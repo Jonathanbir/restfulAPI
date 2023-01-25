@@ -3,7 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 const Student = require("./models/student");
 
-let port = 3000;
+let port = 3010;
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/exampleDB")
@@ -17,6 +17,7 @@ mongoose
 app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extende: true }));
+app.use(cors());
 
 //get
 app.get("/students", async (req, res) => {
