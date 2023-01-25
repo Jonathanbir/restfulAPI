@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const studentRoutes = require("./routes/student-routes");
+const facultyRoutes = require("./routes/faculty-routes");
 
 let port = 3025;
 
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extende: true }));
 app.use(methodOverride("_method"));
 
 app.use("/students", studentRoutes);
+app.use("/faculty", facultyRoutes);
 
 // app.use(cors());
 
