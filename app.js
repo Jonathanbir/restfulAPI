@@ -31,7 +31,7 @@ app.get("/students", async (req, res) => {
 });
 
 //new
-app.get("/students/new", (res, req) => {
+app.get("/students/new", (req, res) => {
   return res.render("new-student-form");
 });
 
@@ -53,21 +53,19 @@ app.get("/students/:_id", async (req, res) => {
 //post
 app.post("/students", async (req, res) => {
   try {
-    let { name, age, major, merit, other } = req.body;
-    // console.log(name, age, major, merit, other);
+    let { name, age, merit, other } = req.body;
     let newStudent = new Student({
       name,
       age,
-      major,
-      scholarship: { merit, other },
+      scholarship: {
+        merit,
+        other,
+      },
     });
     let savedStudent = await newStudent.save();
-    return res.send({
-      msg: "資料儲存成功",
-      savedObject: savedStudent,
-    });
+    return res.render("student-save-success", { savedStudent });
   } catch (e) {
-    return res.status(400).send(e.message);
+    return res.status(400).render("student-save-fail.ejs");
   }
 });
 
@@ -75,10 +73,10 @@ app.post("/students", async (req, res) => {
 app.put("/students/:_id", async (req, res) => {
   try {
     let { _id } = req.params;
-    let { name, age, major, merit, other } = req.body;
+    let { name, age, merit, other } = req.body;
     let newData = await Student.findOneAndUpdate(
       { _id },
-      { name, age, major, scholarship: { merit, other } },
+      { name, age, scholarship: { merit, other } },
       {
         new: true,
         runValidators: true,

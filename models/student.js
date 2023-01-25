@@ -5,11 +5,6 @@ const studentSchema = new Schema({
   name: { type: String, required: true, minLength: 1, maxLength: 25 },
   age: { type: Number, min: [0, "年齡不能小於0"] },
   //   major: { type: String, required: [true, "每個學生都需要選至少一個主修"] },
-  major: {
-    type: String,
-    required: true,
-    minLength: 2,
-  },
   age: {
     type: Number,
     default: 18,
